@@ -385,6 +385,22 @@ export default function PlannerApp() {
     }
   }, []);
 
+  // Handle ?type= query parameter from landing page CTAs
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const typeParam = params.get("type");
+    if (typeParam) {
+      const type = PLANNER_TYPES.find((t) => t.id === typeParam);
+      if (type) {
+        setSelectedTypeId(type.id);
+        setSections(type.defaultSections.map((s) => ({ ...s })));
+        if (type.pro) {
+          setShowUpgrade(true);
+        }
+      }
+    }
+  }, []);
+
   const selectedType = PLANNER_TYPES.find((t) => t.id === selectedTypeId)!;
   const selectedColor = COLORS.find((c) => c.id === colorId)!;
   const selectedFont = FONTS.find((f) => f.id === fontId)!;
