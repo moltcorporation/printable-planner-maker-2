@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { jsPDF } from "jspdf";
 import {
   PLANNER_TYPES,
@@ -13,43 +13,76 @@ import {
   type Orientation,
 } from "./planner-data";
 
+const MONTHLY_LINK = "https://buy.stripe.com/cNi7sL9JVaWt9LDd6I3Nm0x";
+const YEARLY_LINK = "https://buy.stripe.com/7sY5kD7BN9Spf5X3w83Nm0y";
+
 function UpgradeModal({ onClose }: { onClose: () => void }) {
+  const [plan, setPlan] = useState<"monthly" | "yearly">("yearly");
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
         <h3 className="text-2xl font-bold text-gray-900">Unlock Pro Planners</h3>
         <p className="mt-2 text-gray-600">
-          Get access to all planner types, custom layouts, and watermark-free PDF exports.
+          Get access to all 11 planner types, custom layouts, and watermark-free PDF exports.
         </p>
         <div className="mt-6 space-y-3">
-          <div className="rounded-xl border-2 border-indigo-500 bg-indigo-50 p-4">
+          <button
+            onClick={() => setPlan("yearly")}
+            className={`w-full rounded-xl p-4 text-left transition ${
+              plan === "yearly"
+                ? "border-2 border-indigo-500 bg-indigo-50"
+                : "border border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-gray-900">Yearly</p>
+                  <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Save 37%</span>
+                </div>
+                <p className="text-sm text-gray-600">$2.50/mo billed annually</p>
+              </div>
+              <p className="text-2xl font-bold text-gray-900">$29.99<span className="text-sm font-normal text-gray-500">/yr</span></p>
+            </div>
+          </button>
+          <button
+            onClick={() => setPlan("monthly")}
+            className={`w-full rounded-xl p-4 text-left transition ${
+              plan === "monthly"
+                ? "border-2 border-indigo-500 bg-indigo-50"
+                : "border border-gray-200 hover:border-gray-300"
+            }`}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-semibold text-gray-900">Monthly</p>
                 <p className="text-sm text-gray-600">Billed monthly</p>
               </div>
-              <p className="text-2xl font-bold text-indigo-600">$3.99<span className="text-sm font-normal text-gray-500">/mo</span></p>
+              <p className="text-2xl font-bold text-gray-900">$3.99<span className="text-sm font-normal text-gray-500">/mo</span></p>
             </div>
-          </div>
-          <div className="rounded-xl border border-gray-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-gray-900">Yearly</p>
-                <p className="text-sm text-gray-600">Save 37%</p>
-              </div>
-              <p className="text-2xl font-bold text-gray-900">$29.99<span className="text-sm font-normal text-gray-500">/yr</span></p>
-            </div>
-          </div>
+          </button>
         </div>
-        <p className="mt-4 text-center text-xs text-gray-500">
-          Payment integration coming soon
-        </p>
+        <a
+          href={plan === "monthly" ? MONTHLY_LINK : YEARLY_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 block w-full rounded-lg bg-indigo-600 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-700"
+        >
+          Get Pro Access
+        </a>
         <button
           onClick={onClose}
-          className="mt-6 w-full rounded-lg bg-gray-100 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+          className="mt-3 w-full rounded-lg bg-gray-100 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
         >
           Maybe Later
         </button>
+        <p className="mt-3 text-center text-xs text-gray-400">
+          Already subscribed?{" "}
+          <a href="/success" className="text-indigo-600 hover:underline">
+            Activate your account
+          </a>
+        </p>
       </div>
     </div>
   );
@@ -151,6 +184,7 @@ function PlannerPreview({
   font,
   orientation,
   svgRef,
+  isPro,
 }: {
   plannerType: PlannerType;
   sections: PlannerSection[];
@@ -158,6 +192,7 @@ function PlannerPreview({
   font: (typeof FONTS)[number];
   orientation: Orientation;
   svgRef: React.RefObject<SVGSVGElement | null>;
+  isPro: boolean;
 }) {
   const isLandscape = orientation === "landscape";
   const viewW = isLandscape ? 792 : 612;
@@ -305,16 +340,18 @@ function PlannerPreview({
         })}
 
         {/* Watermark for free tier */}
-        <text
-          x={viewW / 2}
-          y={viewH - 16}
-          textAnchor="middle"
-          fontSize={9}
-          fill="#999"
-          fontFamily="system-ui, sans-serif"
-        >
-          Made with Printable Planner Maker — printableplanner.org
-        </text>
+        {!isPro && (
+          <text
+            x={viewW / 2}
+            y={viewH - 16}
+            textAnchor="middle"
+            fontSize={9}
+            fill="#999"
+            fontFamily="system-ui, sans-serif"
+          >
+            Made with Printable Planner Maker — printableplanner.org
+          </text>
+        )}
       </svg>
     </div>
   );
@@ -331,20 +368,35 @@ export default function PlannerApp() {
   const [pageSize, setPageSize] = useState<PageSize>("letter");
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [isPro, setIsPro] = useState(false);
   const svgRef = useRef<SVGSVGElement | null>(null);
+
+  // Check pro status on mount
+  useEffect(() => {
+    const email = localStorage.getItem("planner-pro-email");
+    if (email) {
+      fetch(`/api/check-pro?email=${encodeURIComponent(email)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.pro) setIsPro(true);
+          else localStorage.removeItem("planner-pro-email");
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   const selectedType = PLANNER_TYPES.find((t) => t.id === selectedTypeId)!;
   const selectedColor = COLORS.find((c) => c.id === colorId)!;
   const selectedFont = FONTS.find((f) => f.id === fontId)!;
 
   const handleTypeSelect = useCallback((type: PlannerType) => {
-    if (type.pro) {
+    if (type.pro && !isPro) {
       setShowUpgrade(true);
       return;
     }
     setSelectedTypeId(type.id);
     setSections(type.defaultSections.map((s) => ({ ...s })));
-  }, []);
+  }, [isPro]);
 
   const generatePDF = useCallback(() => {
     setGenerating(true);
@@ -439,22 +491,24 @@ export default function PlannerApp() {
         currentY += sectionH + gap;
       });
 
-      // Watermark
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(7);
-      doc.setTextColor(153, 153, 153);
-      doc.text(
-        "Made with Printable Planner Maker — printableplanner.org",
-        pageW / 2,
-        pageH - 5,
-        { align: "center" }
-      );
+      // Watermark (free tier only)
+      if (!isPro) {
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(153, 153, 153);
+        doc.text(
+          "Made with Printable Planner Maker — printableplanner.org",
+          pageW / 2,
+          pageH - 5,
+          { align: "center" }
+        );
+      }
 
       doc.save(`${selectedType.id}-planner.pdf`);
     } finally {
       setGenerating(false);
     }
-  }, [orientation, pageSize, selectedType, selectedColor, selectedFont, sections]);
+  }, [orientation, pageSize, selectedType, selectedColor, selectedFont, sections, isPro]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -497,7 +551,7 @@ export default function PlannerApp() {
                     key={type.id}
                     onClick={() => handleTypeSelect(type)}
                     className={`relative flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition ${
-                      selectedTypeId === type.id && !type.pro
+                      selectedTypeId === type.id
                         ? "border-indigo-500 bg-indigo-50 text-indigo-700"
                         : "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50"
                     }`}
@@ -506,7 +560,7 @@ export default function PlannerApp() {
                     <span className="truncate text-xs font-medium">
                       {type.label}
                     </span>
-                    {type.pro && (
+                    {type.pro && !isPro && (
                       <span className="absolute -right-1 -top-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
                         PRO
                       </span>
@@ -628,6 +682,7 @@ export default function PlannerApp() {
                 font={selectedFont}
                 orientation={orientation}
                 svgRef={svgRef}
+                isPro={isPro}
               />
               <div className="mt-4 flex justify-center">
                 <button
@@ -643,6 +698,51 @@ export default function PlannerApp() {
           </div>
         </div>
       </div>
+
+      {/* Pricing Section */}
+      {!isPro && (
+        <section className="border-t border-gray-200 bg-gradient-to-b from-indigo-50 to-white">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+            <h2 className="text-center text-2xl font-bold text-gray-900">
+              Unlock All Planner Types
+            </h2>
+            <p className="mx-auto mt-2 max-w-xl text-center text-gray-600">
+              Upgrade to Pro for access to meal, wedding, fitness, budget, and 4 more planner types — plus watermark-free PDF exports.
+            </p>
+            <div className="mx-auto mt-8 grid max-w-2xl gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <h3 className="font-semibold text-gray-900">Free</h3>
+                <p className="mt-1 text-3xl font-bold text-gray-900">$0</p>
+                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                  <li>3 planner types (daily, weekly, monthly)</li>
+                  <li>Basic customization</li>
+                  <li>PDF download with watermark</li>
+                </ul>
+              </div>
+              <div className="rounded-xl border-2 border-indigo-500 bg-white p-6 shadow-md">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-indigo-600">Pro</h3>
+                  <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Popular</span>
+                </div>
+                <p className="mt-1 text-3xl font-bold text-gray-900">$2.50<span className="text-base font-normal text-gray-500">/mo</span></p>
+                <p className="text-xs text-gray-500">$29.99/yr or $3.99/mo</p>
+                <ul className="mt-4 space-y-2 text-sm text-gray-600">
+                  <li>All 11 planner types</li>
+                  <li>Full customization</li>
+                  <li>No watermark</li>
+                  <li>Landscape + A4 layouts</li>
+                </ul>
+                <button
+                  onClick={() => setShowUpgrade(true)}
+                  className="mt-4 w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                >
+                  Upgrade to Pro
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* SEO / Info Section */}
       <section className="border-t border-gray-200 bg-white">
