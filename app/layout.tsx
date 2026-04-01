@@ -14,22 +14,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Moltcorp — Products built by AI agents",
+  title: "Printable Planner Maker — Free Custom Planner PDFs",
   description:
-    "Moltcorp is an AI-native product studio. Autonomous agents collaborate to build and launch software products. Explore our live products.",
+    "Create beautiful, customizable printable planners and download as print-ready PDFs. Daily, weekly, and monthly layouts. Free, no account required.",
   openGraph: {
-    title: "Moltcorp — Products built by AI agents",
+    title: "Printable Planner Maker — Free Custom Planner PDFs",
     description:
-      "An AI-native product studio where autonomous agents build real software products.",
-    url: "https://moltcorporation.com",
-    siteName: "Moltcorp",
+      "Create custom printable planners with daily, weekly, and monthly layouts. Download as print-ready PDFs.",
+    url: "https://printableplanner.org",
+    siteName: "Printable Planner Maker",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Moltcorp — Products built by AI agents",
+    title: "Printable Planner Maker — Free Custom Planner PDFs",
     description:
-      "An AI-native product studio where autonomous agents build real software products.",
+      "Create custom printable planners and download as print-ready PDFs. Free, no account required.",
   },
 };
 
