@@ -1,8 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafaf8;
+  --foreground: #2c2c2e;
+  --sage: #6b8f71;
+  --sage-dark: #527a58;
+  --sage-light: #f2f7f3;
+  --rose: #c08b8b;
+  --rose-dark: #a07272;
+  --rose-light: #faf2f2;
+  --warm-gray: #8c8580;
+  --warm-gray-light: #f5f3f0;
+  --taupe: #b8a99a;
+  --border: #e2ddd7;
+  --border-dark: #cfc8bf;
+  --muted: #6e6862;
+  --muted-light: #a09890;
+  --surface: #f5f2ee;
 }
 
 @theme inline {
@@ -12,15 +26,102 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  line-height: 1.7;
+}
+
+/* ===== OVERRIDE ZINC ===== */
+.bg-white { background-color: #fefefe !important; }
+.bg-zinc-50 { background-color: var(--surface) !important; }
+.bg-zinc-100 { background-color: var(--warm-gray-light) !important; }
+.bg-zinc-900 {
+  background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%) !important;
+  color: white !important;
+}
+.bg-zinc-900:hover, .hover\:bg-zinc-800:hover {
+  background: linear-gradient(135deg, var(--sage-dark) 0%, #3d6343 100%) !important;
+}
+
+.text-zinc-900 { color: var(--foreground) !important; }
+.text-zinc-700 { color: #3a3835 !important; }
+.text-zinc-600 { color: var(--muted) !important; }
+.text-zinc-500 { color: var(--muted-light) !important; }
+
+.border-zinc-200 { border-color: var(--border) !important; }
+.border-zinc-300 { border-color: var(--border-dark) !important; }
+
+.text-blue-600, .text-indigo-600 { color: var(--sage-dark) !important; }
+.ring-2 { --tw-ring-color: var(--rose) !important; }
+
+/* ===== HEADINGS ===== */
+main > h1:first-of-type, h1.text-3xl, h1.text-4xl {
+  font-weight: 700 !important;
+  letter-spacing: -0.3px;
+  color: var(--sage-dark) !important;
+}
+
+/* Subtle sage divider after first element */
+main > :first-child::before {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--sage), var(--rose), transparent);
+  margin-bottom: 24px;
+  border-radius: 1px;
+}
+
+/* Section heading underline */
+.text-2xl.font-semibold, h2.text-2xl, h2.text-xl {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+.text-2xl.font-semibold::after, h2.text-2xl::after, h2.text-xl::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: var(--sage);
+  border-radius: 1px;
+}
+
+/* ===== CARDS ===== */
+.rounded-lg.border, .rounded-xl.border {
+  border-color: var(--border) !important;
+  box-shadow: 0 1px 6px rgba(44, 44, 46, 0.04);
+  transition: all 0.25s ease;
+}
+.rounded-lg.border:hover, .rounded-xl.border:hover {
+  box-shadow: 0 4px 20px rgba(107, 143, 113, 0.08);
+  border-color: var(--sage) !important;
+  transform: translateY(-1px);
+}
+
+/* ===== PRICING ===== */
+.ring-2.ring-offset-2 {
+  box-shadow: 0 8px 28px rgba(192, 139, 139, 0.12) !important;
+}
+
+/* ===== FOOTER ===== */
+footer, .border-t {
+  border-color: var(--border) !important;
+  background: var(--surface) !important;
+}
+
+/* ===== FAQ ===== */
+details { border-color: var(--border) !important; }
+
+/* ===== PRINT ===== */
+@media print {
+  body { background: white !important; }
+}
+
+@media (max-width: 640px) {
+  main > h1:first-of-type { font-size: 28px !important; }
 }
